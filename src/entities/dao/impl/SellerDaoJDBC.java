@@ -18,9 +18,11 @@ import java.util.Map;
 public class SellerDaoJDBC implements SellerDAO {
 
     private Connection connection;
+
     public SellerDaoJDBC(Connection connection) {
         this.connection = connection;
     }
+
     @Override
     public void insert(Seller obj) {
 
@@ -41,7 +43,7 @@ public class SellerDaoJDBC implements SellerDAO {
 
         PreparedStatement statement = null;
         ResultSet resultSet = null;
-        try{
+        try {
             statement = connection.prepareStatement(
                     "select seller. *,department.Name as DepName " +
                             "from seller inner join department  " +
@@ -50,16 +52,16 @@ public class SellerDaoJDBC implements SellerDAO {
             );
             statement.setInt(1, id);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
 
-                    Department department = instatiateDepartment(resultSet);
-                    Seller seller = instantiateSeller(resultSet,department);
-                    return seller;
+                Department department = instatiateDepartment(resultSet);
+                Seller seller = instantiateSeller(resultSet, department);
+                return seller;
             }
             return null;
-        }catch (SQLException e){
+        } catch (SQLException e) {
             throw new DbException(e.getMessage());
-        }finally {
+        } finally {
             DB.closeStatement(statement);
             DB.closeResultSet(resultSet);
         }
@@ -79,7 +81,7 @@ public class SellerDaoJDBC implements SellerDAO {
     }
 
     private Department instatiateDepartment(ResultSet resultSet) throws SQLException {
-       Department department= new Department();
+        Department department = new Department();
         department.setId(resultSet.getInt("DepartmentId"));
         department.setDepartmentName(resultSet.getString("DepName"));
         return department;
@@ -87,14 +89,42 @@ public class SellerDaoJDBC implements SellerDAO {
 
     @Override
     public List<Seller> findAll() {
-        return List.of();
+
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        try {
+            statement = connection.prepareStatement(
+                    "select seller. *,department.Name as DepName from seller inner join department " +
+                            "on seller.DepartmentId = department.Id order by Name"
+            );
+            resultSet = statement.executeQuery();
+            List<Seller> sellers = new ArrayList<>();
+            Map<Integer, Department> departments = new HashMap<>();
+            while (resultSet.next()) {
+                Department department = departments.get(resultSet.getInt("DepartmentId"));
+                if (department == null) {
+                    department = instatiateDepartment(resultSet);
+                    departments.put(resultSet.getInt("DepartmentId"), department);
+
+                }
+                Seller seller = instantiateSeller(resultSet, department);
+                sellers.add(seller);
+            }
+                return sellers;
+
+        } catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        } finally {
+            DB.closeStatement(statement);
+            DB.closeResultSet(resultSet);
+        }
     }
 
+
+
+
     @Override
-    public List<Seller> findByDepartment(Department department) {
-
-
-
+    public List<Seller> findByDepartment(Department dep) {
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         try{
@@ -103,13 +133,14 @@ public class SellerDaoJDBC implements SellerDAO {
                             "on seller.DepartmentId = department.Id where DepartmentId = ? " +
                             "order by Name"
             );
-            statement.setInt(1, department.getId());
+            statement.setInt(1, dep.getId());
             resultSet = statement.executeQuery();
             List<Seller> sellers = new ArrayList<>();
             Map<Integer,Department> departments = new HashMap<>();
             while(resultSet.next()){
-                Department buscaDepartment = departments.get(resultSet.getInt("DepartmentId"));
-                if(buscaDepartment == null){
+                Department department = departments.get(resultSet.getInt("DepartmentId"));
+
+                if(department == null){
                      department = instatiateDepartment(resultSet);
                      departments.put(resultSet.getInt("DepartmentId"),department);
                 }
