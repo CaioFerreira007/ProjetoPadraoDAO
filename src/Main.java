@@ -3,6 +3,7 @@ import entities.Seller;
 import entities.dao.DaoFactory;
 import entities.dao.SellerDAO;
 
+import java.util.Date;
 import java.util.List;
 
 public class Main {
@@ -24,6 +25,13 @@ public class Main {
         System.out.println("==== TEST 3: seller findByAll ====");
         list = sellerDao.findAll();
         list.forEach(System.out::println);
+        System.out.println();
+
+
+        System.out.println("==== TEST 4: seller insert ====");
+        Seller newSeller = new Seller (4000.0,new Date(),department,"Greg@gmail.com",null,"Greg");
+        sellerDao.insert(newSeller);
+        System.out.println("New seller inserted: "+ newSeller.getId());
 
     }
 
