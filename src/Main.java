@@ -28,10 +28,20 @@ public class Main {
         System.out.println();
 
 
-        System.out.println("==== TEST 4: seller insert ====");
-        Seller newSeller = new Seller (4000.0,new Date(),department,"Greg@gmail.com",null,"Greg");
-        sellerDao.insert(newSeller);
-        System.out.println("New seller inserted: "+ newSeller.getId());
+      //  System.out.println("==== TEST 4: seller insert ====");
+        //Seller newSeller = new Seller (4000.0,new Date(),department,"Greg@gmail.com",null,"Greg");
+        //sellerDao.insert(newSeller);
+        //System.out.println("New seller inserted: "+ newSeller.getId());
+
+        System.out.println();
+
+        System.out.println("==== TEST 5: seller update ====");
+        seller = sellerDao.findById(1);
+        seller.setName("Batman ");
+        sellerDao.update(seller);
+        System.out.println("New seller updated: "+ seller.getName());
+        list = sellerDao.findAll();
+        list.forEach(System.out::println);
 
     }
 
